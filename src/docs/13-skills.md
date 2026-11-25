@@ -28,6 +28,30 @@ rbridge skills add https://github.com/org/skills --rev <full commit> --subdir re
 
 Every skill has a digest of its files. If the files change, rbridge refuses the skill until it is added again.
 
+### Many skills in one command
+
+Give `skills add` a folder that holds skills and it finds every folder with a `SKILL.md` below it (not inside a skill, and not in hidden folders or `node_modules`). Several folders can be given at once.
+
+```sh
+rbridge skills add ./skills                                    # every skill found
+rbridge skills add ./skills ./vendor/skills                    # several sources
+rbridge skills add ./skills --dry-run                          # what would be added, nothing installed
+rbridge skills add ./skills --exclude 'draft-*'                # leave some out
+rbridge skills add ./skills --only metric-discovery,metric-verification
+rbridge skills add ./skills --trust reviewed                   # your own skills, trusted in the same step
+rbridge skills add https://github.com/org/skills --rev <full commit>              # the whole repository
+rbridge skills add https://github.com/org/skills --rev <full commit> --subdir audits --subdir docs
+```
+
+`--only` and `--exclude` take skill names or patterns, comma-separated or repeated. An `--only` that matches nothing stops the command before anything is installed. One skill that fails to validate does not stop the others: each is reported, and the command exits non-zero if any failed.
+
+`skills trust` and `skills remove` also take several ids or patterns:
+
+```sh
+rbridge skills trust 'metric-*' evidence-rules reviewed
+rbridge skills remove 'draft-*'
+```
+
 ## Trust
 
 | Trust | Instructions delivered | Scripts delivered |

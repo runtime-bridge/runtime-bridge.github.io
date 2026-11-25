@@ -71,10 +71,14 @@ rbridge sessions prune --older-than 720h
 
 ```sh
 rbridge skills add ./skills/security-audit
+rbridge skills add ./skills                # every skill found under ./skills
+rbridge skills add ./skills --exclude 'draft-*' --dry-run
+rbridge skills add ./skills --only security-audit,release-notes --trust reviewed
 rbridge skills add https://github.com/org/skills --rev 4f1c0e7d9a2b3c4d5e6f708192a3b4c5d6e7f809 --subdir security-audit
 rbridge skills list
 rbridge skills show security-audit         # metadata, files, measured compatibility
 rbridge skills trust security-audit reviewed
+rbridge skills trust 'audit-*' release-notes reviewed
 rbridge skills verify                      # recompute every digest
 rbridge skills remove security-audit
 ```
