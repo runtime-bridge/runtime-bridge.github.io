@@ -56,6 +56,7 @@ rb -X DELETE http://127.0.0.1:7432/v1/sessions/$SESSION
 | `GET /v1/status` | Version, pid, open sessions |
 | `GET /v1/providers`, `GET /v1/providers/{id}` | Runtimes (`?refresh=true` detects again) |
 | `GET /v1/skills`, `POST /v1/skills`, `GET /v1/skills/{id}`, `DELETE /v1/skills/{id}` | Skill library; POST takes `path`, a Git `url` + `rev` (+ `subdir`), or `catalog` |
+| `POST /v1/skills/batch` | Every skill in `paths` (absolute folders) or a Git `url` + `rev` (+ `subdirs`), with `only`, `exclude`, `trust`, `dry_run`; one item per skill with its `status` |
 | `PUT /v1/skills/{id}/trust` | `{"trust": "reviewed"}` |
 | `GET /v1/skills/search?q=` | Configured catalogs |
 | `POST /v1/sessions`, `GET /v1/sessions`, `GET /v1/sessions/{id}`, `DELETE /v1/sessions/{id}` | Sessions; POST takes `task`, `model`, `mode`, `input` |

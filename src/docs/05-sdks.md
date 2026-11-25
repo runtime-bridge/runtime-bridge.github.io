@@ -179,6 +179,24 @@ curl -s -X PUT http://127.0.0.1:7432/v1/skills/release-notes/trust -H "Authoriza
 ```
 :::
 
+An application that ships a folder of skills adds them in one call. Each takes the same filters as the CLI (`only`, `exclude`, `trust`, a dry run) and returns one item per skill found, with its status:
+
+:::tabs
+```go title="Go"
+res, err := b.AddSkills(ctx, []string{"/opt/my-app/skills"}, bridge.AddSkillsOptions{Exclude: []string{"draft-*"}, Trust: bridge.TrustReviewed})
+```
+```js title="Node.js"
+const { items } = await rb.addSkills("./skills", { exclude: ["draft-*"], trust: "reviewed" });
+```
+```py title="Python"
+items = rb.add_skills("./skills", exclude=["draft-*"], trust="reviewed")["items"]
+```
+```sh title="HTTP"
+curl -s http://127.0.0.1:7432/v1/skills/batch -H "Authorization: Bearer $TOKEN" -H "X-Rbridge-Client: my-app" \
+  -d '{"paths": ["/opt/my-app/skills"], "exclude": ["draft-*"], "trust": "reviewed"}'
+```
+:::
+
 ## Structured answers
 
 :::tabs
