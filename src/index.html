@@ -169,19 +169,18 @@ fmt.Println(res.Output)
       <div class="tab-panel" role="tabpanel" data-panel="Node.js" hidden><figure class="code"><figcaption><span>JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:js}}
 import { Rbridge } from "@rbridge/sdk";
 
-const rb = new Rbridge({ runtime: "claude-code" });
+const rb = new Rbridge({ runtime: "claude-code", chat: true, stream: true });
 
-for await (const chunk of await rb.run("Audit this project", { stream: true })) {
-  process.stdout.write(chunk);
-}
+await rb.run("Audit this project");
+await rb.run("Fix the worst finding");
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="Python" hidden><figure class="code"><figcaption><span>Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:py}}
 from rbridge import Rbridge
 
-rb = Rbridge(runtime="claude-code")
+rb = Rbridge(runtime="claude-code", chat=True, stream=True)
 
-for chunk in rb.run("Audit this project", stream=True):
-    print(chunk, end="")
+rb.run("Audit this project")
+rb.run("Fix the worst finding")
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="HTTP" hidden><figure class="code"><figcaption><span>HTTP</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:sh}}
 curl -s http://127.0.0.1:7432/v1/run \

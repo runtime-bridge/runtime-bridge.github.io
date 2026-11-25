@@ -20,12 +20,12 @@ rb = Rbridge(runtime="claude-code")               # any id from rb.runtimes(); u
 
 print(rb.run("Summarise this project").text)      # one answer
 
-for chunk in rb.run("Explain app.py", stream=True):   # streaming is one argument
-    print(chunk, end="", flush=True)
+rb.run("Explain app.py", stream=True)             # printed as it is written
 
-chat = rb.chat()                                  # a conversation that remembers
-chat.send("What does app.py do?")
-print(chat.send("Now write tests for it").text)
+bot = Rbridge(runtime="claude-code", chat=True, stream=True)   # set it all once
+bot.run("What does app.py do?")                   # one conversation, streamed
+bot.run("Now write tests for it")                 # remembers the last answer
+bot.run(["Summarise the tests", "Shorter"])       # several messages, one call
 
 for r in rb.run_many(["Review a.py", "Review b.py"]):  # side by side, no threads to write
     print(r.text)
@@ -34,9 +34,9 @@ r = rb.run("List the TODOs", schema={"type": "object", "properties": {"todos": {
 print(r.data["todos"])                            # structured output, parsed
 ```
 
-Nothing to set up first: `Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `max_concurrency`, `max_cost_usd`) can be a default on `Rbridge(...)` and overridden on any call. `skills` takes ids or folders of skills your program ships. `approve` decides permission requests: `False` denies (the default), `True` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `session_id`, `usage` and `raw`; `rb.usage` totals every run.
+Nothing to set up first: `Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `max_concurrency`, `max_cost_usd`) can be a default on `Rbridge(...)` and overridden on any call. `skills` takes ids or folders of skills your program ships. `stream=True` prints as the answer is written and still returns the whole `Response`; pass a function to receive the chunks, or use `rb.stream(...)` for an iterator. `chat=True` makes every `run` continue one conversation (`rb.reset()` starts a new one; `rb.chat()` gives separate conversation objects). `approve` decides permission requests: `False` denies (the default), `True` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `session_id`, `usage` and `raw`; `rb.usage` totals every run.
 
-In async code, `AsyncRbridge` has the same calls awaited, so `asyncio.gather(rb.run("a"), rb.run("b"))` runs two at once and `async for chunk in await rb.run(..., stream=True)` streams.
+In async code, `AsyncRbridge` has the same calls awaited, so `asyncio.gather(rb.run("a"), rb.run("b"))` runs two at once and `await rb.run(..., stream=True)` streams.
 
 ## The lower-level client
 

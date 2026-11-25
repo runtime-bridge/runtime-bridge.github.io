@@ -20,11 +20,12 @@ const rb = new Rbridge({ runtime: "claude-code" });   // any id from rb.runtimes
 
 console.log((await rb.run("Summarise this project")).text);
 
-for await (const chunk of await rb.run("Explain app.js", { stream: true })) process.stdout.write(chunk);
+await rb.run("Explain app.js", { stream: true });     // printed as it is written
 
-const chat = rb.chat();                                // a conversation that remembers
-await chat.send("What does app.js do?");
-console.log((await chat.send("Now write tests for it")).text);
+const bot = new Rbridge({ runtime: "claude-code", chat: true, stream: true });  // set it all once
+await bot.run("What does app.js do?");                 // one conversation, streamed
+await bot.run("Now write tests for it");               // remembers the last answer
+await bot.run(["Summarise the tests", "Shorter"]);     // several messages, one call
 
 const [a, b] = await Promise.all([rb.run("Review a.js"), rb.run("Review b.js")]);  // or rb.runMany([...])
 
@@ -34,7 +35,7 @@ console.log(r.data.todos);
 await rb.close();
 ```
 
-Nothing to set up first: `new Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `maxConcurrency`, `maxCostUsd`) can be a default on the constructor and overridden on any call. `skills` takes ids or folders of skills your program ships. `approve` decides permission requests: `false` denies (the default), `true` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `sessionId`, `usage` and `raw`; `rb.usage` totals every run.
+Nothing to set up first: `new Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `maxConcurrency`, `maxCostUsd`) can be a default on the constructor and overridden on any call. `skills` takes ids or folders of skills your program ships. `stream: true` prints as the answer is written and still resolves to the whole `Response`; pass a function to receive the chunks, or use `rb.stream(...)` for an async iterator. `chat: true` makes every `run` continue one conversation (`rb.reset()` starts a new one; `rb.chat()` gives separate conversation objects). `approve` decides permission requests: `false` denies (the default), `true` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `sessionId`, `usage` and `raw`; `rb.usage` totals every run.
 
 ## The lower-level client
 
