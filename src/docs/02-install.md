@@ -69,7 +69,12 @@ rbridge doctor
 
 ## SDKs
 
-The SDKs talk to the rbridge daemon. Neither has third-party dependencies. `connect()` starts the daemon itself when none is running, and a daemon started that way stops after 30 idle minutes; pass `start=False` (Python) or `start: false` (Node.js) to only connect to a running one.
+The SDKs talk to the rbridge daemon and start it themselves when it is not running (a daemon started that way stops after 30 idle minutes). Neither has third-party dependencies. Once installed, the first call is one line:
+
+```python
+from rbridge import Rbridge
+print(Rbridge(runtime="claude-code").run("Summarise this project").text)
+```
 
 :::tabs
 ```sh title="Node.js"

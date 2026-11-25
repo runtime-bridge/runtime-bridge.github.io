@@ -28,3 +28,17 @@ Every error carries a code that does not change between versions. The CLI turns 
 | `session_not_found` | 50 | Unknown or closed session | `rbridge sessions` |
 | `provider_protocol_error` | 60 | The runtime broke the protocol | Update the runtime; report it if it persists |
 | `internal_error` | 70 | A bug in rbridge | Please [report it](https://github.com/runtime-bridge/rbridge/issues) |
+
+A mistyped provider id, command or subcommand gets the closest match in the message ("did you mean claude-code?") and the list of choices.
+
+## Raised by the SDKs
+
+The Node.js and Python SDKs raise these themselves, before anything reaches the daemon:
+
+| Code or type | Meaning | What to do |
+|---|---|---|
+| `budget_exceeded` | `max_cost_usd` / `maxCostUsd` has been spent, so no new run starts | Raise the limit, or create a new `Rbridge` |
+| `skill_invalid` | A skill folder named in `skills` holds more than one skill, or fails validation | Name one skill folder, or add the folder with `add_skills` / `addSkills` |
+| `provider_unavailable` | No daemon is running and no rbridge was found to start one | Install rbridge (or the SDK package for your platform), or set `RBRIDGE_BIN` |
+| `TypeError` | An unknown option, or a list of messages without `chat` | The message names the option |
+

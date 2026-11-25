@@ -30,9 +30,9 @@ rbridge does not run its own agent loop and never touches provider credentials. 
 
 | Interface | When to use it |
 |---|---|
-| [CLI](/docs/cli/) | Scripts, CI jobs, trying things out |
+| [CLI](/docs/cli/) | Scripts, CI jobs, trying things out, or chatting with a runtime (`rbridge chat`) |
 | [Go library](/docs/go/) | Go programs, in-process, no daemon |
-| [Node.js SDK](/docs/node/) and [Python SDK](/docs/python/) | Applications in those languages, through the daemon |
+| [Node.js SDK](/docs/node/) and [Python SDK](/docs/python/) | Applications in those languages: `Rbridge(runtime="claude-code").run("...")`, with streaming, conversations and several runs at once as options |
 | [HTTP API](/docs/http-api/) | Any language, a browser extension, a local web app |
 | [MCP server](/docs/mcp/) | Letting another agent delegate work to your runtimes |
 

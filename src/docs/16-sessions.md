@@ -14,6 +14,8 @@ rbridge sessions                       # list
 rbridge sessions resume ses_1a2b3c "Continue with the tests"
 ```
 
+A conversation is a session with several turns. In the terminal that is `rbridge chat --provider claude-code`; in the SDKs, `chat=True` (`chat: true`) on `Rbridge` makes every run continue the same session, or `rb.chat()` gives a separate one; in Go, `b.Open` returns a session to `Prompt` again and again.
+
 Sessions whose process ended unexpectedly show as `interrupted`. Old ones are pruned with `rbridge sessions prune` and, in the daemon, daily.
 
 ## Events

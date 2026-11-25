@@ -45,16 +45,17 @@ python3 examples/python-security-review/review.py ~/src/app --fail-on critical
 ```
 
 ```py
-c.add_skill(os.path.join(HERE, "skills", "vuln-review"))
-c.set_skill_trust("vuln-review", "reviewed")
-result = c.run({
-    "workspace": project,
-    "prompt": "Review this project for security vulnerabilities.",
-    "skills": ["vuln-review"],
-    "profile": "observe",
-    "output_schema": SCHEMA,
-})
-findings = result.get("structured", {}).get("findings", [])
+from rbridge import Rbridge
+
+rb = Rbridge(app="security-review")
+result = rb.run(
+    "Review this project for security vulnerabilities.",
+    workspace=project,
+    skills=[os.path.join(HERE, "skills", "vuln-review")],  # shipped with the tool, trusted on first use
+    profile="observe",                                     # read-only
+    schema=SCHEMA,
+)
+findings = result.data["findings"]
 ```
 
 Against Claude Code it found the SQL injection, command injection, path traversal, hard-coded token and MD5 passwords, each with its line and a fix, and exited with 2.
@@ -66,7 +67,7 @@ An operations tool that packages a diagnostics procedure and a health script as 
 ```sh
 cd examples/ts-ops-check && npm install
 node check.js                                   # checks sample/services.json
-node check.js ~/ops --provider claude-code --sandbox files
+node check.js ~/ops --runtime claude-code --sandbox files
 ```
 
 ```js
@@ -78,11 +79,15 @@ export function approve(req) {
     || ["uptime", "df -h", "free -m"].includes(command);
 }
 
-const res = await rb.run(
-  { workspace: dir, prompt: "Check the health of the services in services.json and of this machine.",
-    skills: ["ops-diagnostics"], profile: "controlled", output_schema: schema },
-  { approver: approve },
-);
+const rb = new Rbridge({ app: "ops-check" });
+const res = await rb.run("Check the health of the services in services.json and of this machine.", {
+  workspace: dir,
+  skills: [path.join(here, "skills", "ops-diagnostics")], // shipped with the tool, trusted on first use
+  profile: "controlled",                                  // every command asks
+  schema,
+  approve,                                                // the rules above decide
+});
+console.log(res.data.status);
 ```
 
 With one service up and one down, Claude Code reported `degraded`, the machine's load, disk and memory, and a next step for the service that was down, without changing anything.
