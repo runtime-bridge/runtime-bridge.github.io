@@ -77,6 +77,8 @@ Claude Code keeps each account in its own directory, chosen with `CLAUDE_CONFIG_
 | `task_timeout` | `30m` | Per turn unless the task sets its own |
 | `idle_timeout` | `5m` | End a turn that produces no event for this long |
 | `slot_wait` | `30s` | How long a new session waits for a free slot before failing with `provider_unavailable` |
+| `resource_ceiling_percent` | `0` (off) | How busy sessions may make the machine. Below 75% of it every slot is available; from there concurrency ramps down to one session at the ceiling. A lone session always starts. Linux only; elsewhere nothing is throttled |
+| `memory_headroom_mb` | `2048` | Free memory below which memory use counts towards the ceiling |
 | `command_timeout` | `10m` | Reserved for commands rbridge runs itself |
 | `max_output_bytes` | 10 MiB | Output cap for commands rbridge runs itself |
 | `kill_grace_period` | `10s` | Between asking a runtime to stop and killing its process tree |
