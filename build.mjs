@@ -15,6 +15,8 @@ const src = path.join(root, "src");
 const out = path.join(root, "dist");
 const site = {
   name: "rbridge",
+  author: "Levi Chinecherem Chidi",
+  handle: "0xSemantic",
   url: "https://runtime-bridge.github.io",
   repo: "https://github.com/runtime-bridge/rbridge",
   org: "https://github.com/runtime-bridge",
@@ -251,6 +253,23 @@ function frontMatter(text) {
 
 // ---------- layout ----------
 
+const socials = [
+  { name: "GitHub", url: "https://github.com/0xSemantic", cls: "s-github" },
+  { name: "X", url: "https://x.com/0xsemantic", cls: "s-x" },
+  { name: "LinkedIn", url: "https://www.linkedin.com/in/0xsemantic", cls: "s-linkedin" },
+  { name: "YouTube", url: "https://www.youtube.com/@0xsemantic", cls: "s-youtube" },
+];
+const icons = {
+  "s-github": '<path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/>',
+  "s-x": '<path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.4 4.7H5.6z"/>',
+  "s-linkedin": '<path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.2c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V21h-4z"/>',
+  "s-youtube": '<path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8zM9.7 15.1V8.9l5.8 3.1z"/>',
+};
+const socialLinks = (size = "") =>
+  socials
+    .map((s) => `<a class="social ${s.cls} ${size}" href="${s.url}" rel="noopener me" aria-label="${s.name}: @0xsemantic"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[s.cls]}</svg><span>${s.name}</span></a>`)
+    .join("");
+
 const sections = ["Start here", "Use it", "Concepts", "Reference"];
 
 function head({ title, description, pathname }) {
@@ -264,6 +283,9 @@ function head({ title, description, pathname }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${site.url}/assets/img/logo-light.png">
+<meta name="author" content="${site.author} (${site.handle})">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@0xsemantic">
 <link rel="canonical" href="${site.url}${pathname}">
 <link rel="icon" href="/assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -295,7 +317,12 @@ function topbar(active) {
 </div>`;
 }
 
-const footer = `<footer class="footer">
+const footer = () => `<footer class="footer">
+  <div class="footer-credit">
+    <img src="https://github.com/0xSemantic.png?size=96" alt="" width="44" height="44" loading="lazy">
+    <div>Created by <a href="https://github.com/0xSemantic" rel="noopener me">${site.author}</a>, <strong>@0xsemantic</strong> everywhere.</div>
+    <div class="footer-socials">${socialLinks("small")}</div>
+  </div>
   <div class="footer-inner">
     <div><strong>rbridge</strong> is free and open source under the Apache 2.0 licence.<br>It never touches your credentials.</div>
     <nav aria-label="Footer">
@@ -348,7 +375,7 @@ ${topbar(active)}
     ${toc.length ? `<div class="toc-title">On this page</div><ul>${toc.map((t) => `<li><a href="#${t.id}">${inline(t.text)}</a></li>`).join("")}</ul>` : ""}
   </aside>
 </div>
-${footer}`;
+${footer()}`;
 }
 
 // ---------- build ----------
@@ -397,11 +424,12 @@ export function build() {
     landing
       .replace("{{head}}", head({ title: "rbridge: one bridge to every agent runtime on your machine", description: "Use the agent runtimes you already have (Claude Code, OpenCode, Codex, Gemini CLI, any ACP agent) from any software, with skills, policy and audit. Free, open source, local first.", pathname: "/" }))
       .replace("{{topbar}}", topbar("home"))
-      .replace("{{footer}}", footer)
+      .replace("{{footer}}", footer())
+      .replace("{{socials}}", socialLinks())
       .replace(/\{\{code:(\w+)\}\}([\s\S]*?)\{\{\/code\}\}/g, (_, lang, code) => highlight(code.replace(/^\n/, ""), lang)),
   );
   write("404.html", `${head({ title: "Lost in another universe - rbridge", description: "Page not found", pathname: "/404.html" })}
-<body>${topbar("")}<main class="lost"><div class="burst">404</div><h1>This panel was never drawn.</h1><p><a class="btn" href="/">Back to the front page</a> <a class="btn btn-ghost" href="/docs/">Read the docs</a></p></main>${footer}`);
+<body>${topbar("")}<main class="lost"><div class="burst">404</div><h1>This panel was never drawn.</h1><p><a class="btn" href="/">Back to the front page</a> <a class="btn btn-ghost" href="/docs/">Read the docs</a></p></main>${footer()}`);
 
   // Search index: page titles, headings and a stripped excerpt.
   const index = pages.map((p) => ({
