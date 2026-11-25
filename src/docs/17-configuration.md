@@ -15,6 +15,8 @@ rbridge reads YAML from these layers, later ones winning; maps merge and lists a
 
 `rbridge config` prints the merged result and which files were loaded. Unknown keys are an error. The system file can list `locked` keys (dotted paths such as `policy.default_profile`) that lower layers cannot change. `RBRIDGE_HOME` puts configuration, data, cache and runtime files under one directory.
 
+`rbridge init` creates those folders and writes the user file: a commented starter, or with `--config FILE` a file of your own, which is checked against these rules before it is written. An existing file is never overwritten unless you add `--force`, and then the old one is kept as `config.yaml.bak`.
+
 ## providers
 
 | Key | Default | Meaning |

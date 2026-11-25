@@ -7,7 +7,10 @@ description: From nothing to a task with a skill and an approval, in five minute
 
 ## 1. See what you have
 
+`rbridge init` creates rbridge's folders and a starter configuration; it is safe to run again.
+
 ```sh
+$ rbridge init
 $ rbridge providers
 PROVIDER     STATUS     VERSION  INTEGRATION      AUTH     PATH
 claude-code  available  2.1.331  claude-headless  unknown  /home/me/.local/bin/claude

@@ -7,6 +7,17 @@ description: Every command, with the examples you will actually type.
 
 Every command accepts `--json`, and exit codes are stable (see [Errors and exit codes](/docs/errors/)).
 
+## Set up
+
+```sh
+rbridge init                                         # folders and a commented starter configuration
+rbridge init --config ./rbridge.yaml                 # install your own file, checked first
+rbridge init --config ./rbridge.yaml --force         # replace a different one (backup kept)
+rbridge init --skills ./skills --trust reviewed      # add a folder of skills in the same step
+```
+
+`init` is safe to run again: an existing configuration is kept unless you pass `--force`.
+
 ## Runtimes
 
 ```sh
