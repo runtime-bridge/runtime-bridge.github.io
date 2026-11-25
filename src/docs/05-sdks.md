@@ -7,7 +7,7 @@ description: The same operations side by side in Go, Node.js, Python and plain H
 
 | | Go | Node.js | Python | HTTP |
 |---|---|---|---|---|
-| Package | `github.com/runtime-bridge/rbridge/pkg/bridge` | `@rbridge/sdk` | `rbridge` | `http://127.0.0.1:7432/v1` |
+| Package | `github.com/runtime-bridge/rbridge/pkg/bridge` | `@runtime-bridge/sdk` | `rbridge` | `http://127.0.0.1:7432/v1` |
 | Runs | In your process, or through the daemon | Through the daemon | Through the daemon | Daemon with `daemon.http.enabled: true` |
 | Dependencies | Two small Go modules | None | Standard library only | None |
 
@@ -21,7 +21,7 @@ b, err := bridge.New(ctx, bridge.Options{})                            // in pro
 r, err := bridge.Connect(ctx, bridge.ConnectOptions{Client: "my-app"}) // through the daemon
 ```
 ```js title="Node.js"
-import { connect, connectHTTP } from "@rbridge/sdk";
+import { connect, connectHTTP } from "@runtime-bridge/sdk";
 
 const rb = await connect({ client: "my-app" });       // Unix socket
 const web = await connectHTTP({ client: "my-app" });  // local HTTP, reads the token itself

@@ -64,7 +64,7 @@ res, err := b.Run(ctx, bridge.Task{
 }))
 ```
 ```js title="Node.js"
-import { connect } from "@rbridge/sdk";
+import { connect } from "@runtime-bridge/sdk";
 
 const rb = await connect({ client: "my-app" });
 const res = await rb.run(

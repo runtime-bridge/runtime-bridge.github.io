@@ -167,7 +167,7 @@ res, err := b.Run(ctx, bridge.Task{
 fmt.Println(res.Output)
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="Node.js" hidden><figure class="code"><figcaption><span>JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:js}}
-import { connect } from "@rbridge/sdk";
+import { connect } from "@runtime-bridge/sdk";
 
 const rb = await connect({ client: "my-app" });
 const res = await rb.run(
