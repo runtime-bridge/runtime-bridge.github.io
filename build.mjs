@@ -27,21 +27,25 @@ const slug = (s) =>
   s.toLowerCase().replace(/<[^>]+>/g, "").replace(/`/g, "").replace(/[^a-z0-9 -]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-");
 
 function inline(text) {
-  // Code spans first, so nothing inside them is formatted.
-  return text
+  // Links first, so their text may hold code; then code spans, so nothing
+  // inside them is formatted.
+  const links = [];
+  text = text.replace(/\[((?:`[^`]*`|[^\]])+)\]\(([^)\s]+)\)/g, (_, label, url) => {
+    const ext = /^https?:/.test(url);
+    links.push(`<a href="${esc(url)}"${ext ? ' rel="noopener"' : ""}>${inline(label)}</a>`);
+    return `\u0000${links.length - 1}\u0000`;
+  });
+  const html = text
     .split(/(`[^`]+`)/)
     .map((part) => {
       if (part.startsWith("`") && part.endsWith("`") && part.length > 1) return `<code>${esc(part.slice(1, -1))}</code>`;
       let s = esc(part);
-      s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => {
-        const ext = /^https?:/.test(u);
-        return `<a href="${u}"${ext ? ' rel="noopener"' : ""}>${t}</a>`;
-      });
       s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
       s = s.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
       return s;
     })
     .join("");
+  return html.replace(/\u0000(\d+)\u0000/g, (_, i) => links[Number(i)]);
 }
 
 // ---------- syntax highlighting ----------
