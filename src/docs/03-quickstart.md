@@ -64,7 +64,7 @@ res, err := b.Run(ctx, bridge.Task{
 }))
 ```
 ```js title="Node.js"
-import { connect } from "@runtime-bridge/sdk";
+import { connect } from "@rbridge/sdk";
 
 const rb = await connect({ client: "my-app" });
 const res = await rb.run(
@@ -83,7 +83,7 @@ with rbridge.connect(client="my-app") as rb:
 ```
 :::
 
-The SDKs talk to the daemon, so start it first: `rbridge daemon start`.
+The SDKs talk to the daemon. `connect()` starts one when none is running, and one started that way stops after 30 idle minutes; `rbridge daemon start` runs one that stays up.
 
 ## Next
 

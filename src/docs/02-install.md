@@ -11,10 +11,10 @@ There are two ways to have it, and they can live side by side:
 
 | | Global | Per project |
 |---|---|---|
-| How | The install script, Go, or a source build | `pip install rbridge` in a virtual environment, or `npm install @runtime-bridge/sdk` in a project |
+| How | The install script, Go, or a source build | `pip install rbridge` in a virtual environment, or `npm install @rbridge/sdk` in a project |
 | The program | On your `PATH`, one copy for the machine | Inside `.venv` or `node_modules`, used only there (`rbridge` in the environment, `npx rbridge`) |
 | Its data | Your user folders (configuration, skills, sessions, audit) | The project's `.rbridge` folder |
-| Removing it | `rbridge uninstall --yes`, plus `--purge` for the data | `pip uninstall rbridge` or `npm uninstall @runtime-bridge/sdk`, or delete the environment; delete `.rbridge` for the data |
+| Removing it | `rbridge uninstall --yes`, plus `--purge` for the data | `pip uninstall rbridge` or `npm uninstall @rbridge/sdk`, or delete the environment; delete `.rbridge` for the data |
 
 Inside a project with its own copy, that copy is used and never the global one. `RBRIDGE_HOME`, when set, always decides where the data goes.
 
@@ -69,7 +69,7 @@ rbridge doctor
 
 ## SDKs
 
-The SDKs talk to the rbridge daemon. Neither has third-party dependencies. With `connect(start=True)` in Python or `connect({ start: true })` in Node.js, a program starts the daemon itself when none is running.
+The SDKs talk to the rbridge daemon. Neither has third-party dependencies. `connect()` starts the daemon itself when none is running, and a daemon started that way stops after 30 idle minutes; pass `start=False` (Python) or `start: false` (Node.js) to only connect to a running one.
 
 :::tabs
 ```sh title="Node.js"

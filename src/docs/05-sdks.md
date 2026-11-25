@@ -7,11 +7,11 @@ description: The same operations side by side in Go, Node.js, Python and plain H
 
 | | Go | Node.js | Python | HTTP |
 |---|---|---|---|---|
-| Package | `github.com/runtime-bridge/rbridge/pkg/bridge` | `@runtime-bridge/sdk` | `rbridge` | `http://127.0.0.1:7432/v1` |
+| Package | `github.com/runtime-bridge/rbridge/pkg/bridge` | `@rbridge/sdk` | `rbridge` | `http://127.0.0.1:7432/v1` |
 | Runs | In your process, or through the daemon | Through the daemon | Through the daemon | Daemon with `daemon.http.enabled: true` |
 | Dependencies | Two small Go modules | None | Standard library only | None |
 
-The Node.js and Python SDKs, and HTTP, need the daemon: `rbridge daemon start`. Go can embed rbridge with `bridge.New`, or connect to the daemon with `bridge.Connect`; both return the same `bridge.Client` interface.
+The Node.js and Python SDKs, and HTTP, talk to the daemon. The SDKs start it when it is not running (it then stops after 30 idle minutes); for HTTP, or a daemon that stays up, run `rbridge daemon start`. Go can embed rbridge with `bridge.New`, or connect to the daemon with `bridge.Connect`; both return the same `bridge.Client` interface.
 
 ## Connect
 
@@ -21,7 +21,7 @@ b, err := bridge.New(ctx, bridge.Options{})                            // in pro
 r, err := bridge.Connect(ctx, bridge.ConnectOptions{Client: "my-app"}) // through the daemon
 ```
 ```js title="Node.js"
-import { connect, connectHTTP } from "@runtime-bridge/sdk";
+import { connect, connectHTTP } from "@rbridge/sdk";
 
 const rb = await connect({ client: "my-app" });       // Unix socket
 const web = await connectHTTP({ client: "my-app" });  // local HTTP, reads the token itself
