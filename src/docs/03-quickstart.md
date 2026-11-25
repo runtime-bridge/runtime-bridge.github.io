@@ -64,26 +64,20 @@ res, err := b.Run(ctx, bridge.Task{
 }))
 ```
 ```js title="Node.js"
-import { connect } from "@rbridge/sdk";
+import { Rbridge } from "@rbridge/sdk";
 
-const rb = await connect({ client: "my-app" });
-const res = await rb.run(
-  { workspace: "/home/me/src/app", prompt: "Audit this project", skills: ["security-audit"] },
-  { approver: () => false },
-);
+const rb = new Rbridge({ runtime: "claude-code", skills: ["security-audit"] });
+console.log((await rb.run("Audit this project")).text);
 ```
 ```py title="Python"
-import rbridge
+from rbridge import Rbridge
 
-with rbridge.connect(client="my-app") as rb:
-    res = rb.run(
-        {"workspace": "/home/me/src/app", "prompt": "Audit this project", "skills": ["security-audit"]},
-        approver=lambda req: False,
-    )
+rb = Rbridge(runtime="claude-code", skills=["security-audit"])
+print(rb.run("Audit this project").text)
 ```
 :::
 
-The SDKs talk to the daemon. `connect()` starts one when none is running, and one started that way stops after 30 idle minutes; `rbridge daemon start` runs one that stays up.
+The SDKs start the daemon when it is not running (it then stops after 30 idle minutes), and the workspace is the current folder. Permission requests are denied unless you pass `approve`. Streaming is `stream=True` in Python and `{ stream: true }` in Node.js.
 
 ## Next
 

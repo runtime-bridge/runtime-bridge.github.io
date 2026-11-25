@@ -167,24 +167,21 @@ res, err := b.Run(ctx, bridge.Task{
 fmt.Println(res.Output)
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="Node.js" hidden><figure class="code"><figcaption><span>JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:js}}
-import { connect } from "@rbridge/sdk";
+import { Rbridge } from "@rbridge/sdk";
 
-const rb = await connect({ client: "my-app" });
-const res = await rb.run(
-  { workspace: "/home/me/src/app", prompt: "Audit this project", skills: ["security-audit"] },
-  { onEvent: (e) => e.type === "message.delta" && process.stdout.write(e.data.text) },
-);
-console.log(res.output);
+const rb = new Rbridge({ runtime: "claude-code" });
+
+for await (const chunk of await rb.run("Audit this project", { stream: true })) {
+  process.stdout.write(chunk);
+}
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="Python" hidden><figure class="code"><figcaption><span>Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:py}}
-import rbridge
+from rbridge import Rbridge
 
-with rbridge.connect(client="my-app") as rb:
-    res = rb.run(
-        {"workspace": "/home/me/src/app", "prompt": "Audit this project", "skills": ["security-audit"]},
-        approver=lambda req: req["kind"] == "read",
-    )
-    print(res["output"])
+rb = Rbridge(runtime="claude-code")
+
+for chunk in rb.run("Audit this project", stream=True):
+    print(chunk, end="")
 {{/code}}</code></pre></figure></div>
       <div class="tab-panel" role="tabpanel" data-panel="HTTP" hidden><figure class="code"><figcaption><span>HTTP</span><button class="copy" type="button">Copy</button></figcaption><pre><code>{{code:sh}}
 curl -s http://127.0.0.1:7432/v1/run \
