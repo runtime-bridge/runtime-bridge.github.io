@@ -7,6 +7,21 @@ description: One binary, no runtime of its own. Install it, then let it find you
 
 rbridge is a single static binary for Linux, macOS and Windows on amd64 and arm64. It needs at least one agent runtime installed and signed in, such as Claude Code or OpenCode.
 
+There are two ways to have it, and they can live side by side:
+
+| | Global | Per project |
+|---|---|---|
+| How | The install script, Go, or a source build | `pip install rbridge` in a virtual environment, or `npm install @runtime-bridge/sdk` in a project |
+| The program | On your `PATH`, one copy for the machine | Inside `.venv` or `node_modules`, used only there (`rbridge` in the environment, `npx rbridge`) |
+| Its data | Your user folders (configuration, skills, sessions, audit) | The project's `.rbridge` folder |
+| Removing it | `rbridge uninstall --yes`, plus `--purge` for the data | `pip uninstall rbridge` or `npm uninstall @runtime-bridge/sdk`, or delete the environment; delete `.rbridge` for the data |
+
+Inside a project with its own copy, that copy is used and never the global one. `RBRIDGE_HOME`, when set, always decides where the data goes.
+
+:::note Per-project packages are not published yet
+The wheels and npm packages that carry rbridge are built by each SDK's release scripts and will be on PyPI and npm with the first release. Until then, install rbridge globally and the SDKs from Git, as below.
+:::
+
 ## Install script
 
 The script downloads the latest release, checks its SHA-256 checksum (and its cosign signature when cosign is installed) and puts `rbridge` in `~/.local/bin`.
@@ -32,6 +47,18 @@ make build
 ./bin/rbridge version
 ```
 
+## Uninstall
+
+`rbridge uninstall` lists the program and each data folder with its size, and changes nothing. Add `--yes` to remove the program, and `--purge` to remove the data as well:
+
+```sh
+rbridge uninstall
+rbridge uninstall --yes
+rbridge uninstall --purge --yes
+```
+
+For a copy that came with an SDK, it names the pip or npm command instead, since that package manager owns the file.
+
 ## Check the setup
 
 `rbridge doctor` reports the configuration it loaded, its directories, every runtime it found with its version and sign-in mode, and whether a sandbox engine is available. Each problem comes with a fix.
@@ -42,7 +69,7 @@ rbridge doctor
 
 ## SDKs
 
-The SDKs talk to the rbridge daemon. Neither has third-party dependencies.
+The SDKs talk to the rbridge daemon. Neither has third-party dependencies. With `connect(start=True)` in Python or `connect({ start: true })` in Node.js, a program starts the daemon itself when none is running.
 
 :::tabs
 ```sh title="Node.js"

@@ -25,7 +25,7 @@ with rbridge.connect(client="summary") as rb:
     print("\n---", res["provider"], res.get("usage"))
 ```
 
-`on_event` runs on a background thread for every event. `rbridge.connect_http()` uses the local HTTP API instead of the socket.
+`on_event` runs on a background thread for every event. `rbridge.connect(start=True)` starts the daemon first when none is running, using the rbridge that came with the package, `RBRIDGE_BIN`, or rbridge on `PATH`. `rbridge.connect_http()` uses the local HTTP API instead of the socket.
 
 ## Calls
 

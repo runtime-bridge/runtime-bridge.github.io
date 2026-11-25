@@ -15,7 +15,7 @@ Node.js 20 or later. The package ships `index.d.ts`, so editors and TypeScript g
 ## Run a task
 
 ```js title="review.mjs"
-import { connect } from "@rbridge/sdk";
+import { connect } from "@runtime-bridge/sdk";
 
 const rb = await connect({ client: "review-bot" });
 try {
@@ -29,7 +29,7 @@ try {
 }
 ```
 
-`connect()` finds the daemon's socket the same way rbridge does (`RBRIDGE_HOME`, XDG, OS defaults). `connectHTTP()` uses the local HTTP API and reads the URL and token from the daemon's runtime folder; turn it on with `daemon.http.enabled: true`.
+`connect({ start: true })` starts the daemon first when none is running, using the rbridge that came with the package, `RBRIDGE_BIN`, or rbridge on `PATH`. `connect()` finds the daemon's socket the same way rbridge does (`RBRIDGE_HOME`, XDG, OS defaults). `connectHTTP()` uses the local HTTP API and reads the URL and token from the daemon's runtime folder; turn it on with `daemon.http.enabled: true`.
 
 ## Calls
 
@@ -90,7 +90,7 @@ await s.close();
 Errors are `RbridgeError` with a stable `code`:
 
 ```js
-import { RbridgeError } from "@rbridge/sdk";
+import { RbridgeError } from "@runtime-bridge/sdk";
 
 try {
   await rb.run({ workspace: "/tmp/x", prompt: "hi", provider: "codex" });
