@@ -7,12 +7,42 @@ description: A standard-library-only client for the rbridge daemon.
 
 ```sh
 pip install git+https://github.com/runtime-bridge/rbridge-sdk-python
-rbridge daemon start
 ```
 
 Python 3.10 or later, no third-party packages.
 
-## Run a task
+## The everyday API
+
+```py title="app.py"
+from rbridge import Rbridge
+
+rb = Rbridge(runtime="claude-code")               # any id from rb.runtimes(); unset lets rbridge pick
+
+print(rb.run("Summarise this project").text)      # one answer
+
+for chunk in rb.run("Explain app.py", stream=True):   # streaming is one argument
+    print(chunk, end="", flush=True)
+
+chat = rb.chat()                                  # a conversation that remembers
+chat.send("What does app.py do?")
+print(chat.send("Now write tests for it").text)
+
+for r in rb.run_many(["Review a.py", "Review b.py"]):  # side by side, no threads to write
+    print(r.text)
+
+r = rb.run("List the TODOs", schema={"type": "object", "properties": {"todos": {"type": "array", "items": {"type": "string"}}}})
+print(r.data["todos"])                            # structured output, parsed
+```
+
+Nothing to set up first: `Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `max_concurrency`, `max_cost_usd`) can be a default on `Rbridge(...)` and overridden on any call. `skills` takes ids or folders of skills your program ships. `approve` decides permission requests: `False` denies (the default), `True` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `session_id`, `usage` and `raw`; `rb.usage` totals every run.
+
+In async code, `AsyncRbridge` has the same calls awaited, so `asyncio.gather(rb.run("a"), rb.run("b"))` runs two at once and `async for chunk in await rb.run(..., stream=True)` streams.
+
+## The lower-level client
+
+`rb.client`, or `rbridge.connect()`, is what `Rbridge` is built on: sessions you drive yourself, every event, approvals with options and questions from the runtime.
+
+### Run a task
 
 ```py title="summary.py"
 import rbridge

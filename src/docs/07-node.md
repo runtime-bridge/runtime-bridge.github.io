@@ -7,12 +7,40 @@ description: A dependency-free client for the rbridge daemon, with TypeScript ty
 
 ```sh
 npm install github:runtime-bridge/rbridge-sdk-ts
-rbridge daemon start
 ```
 
 Node.js 20 or later. The package ships `index.d.ts`, so editors and TypeScript get full types.
 
-## Run a task
+## The everyday API
+
+```js title="app.mjs"
+import { Rbridge } from "@rbridge/sdk";
+
+const rb = new Rbridge({ runtime: "claude-code" });   // any id from rb.runtimes(); unset lets rbridge pick
+
+console.log((await rb.run("Summarise this project")).text);
+
+for await (const chunk of await rb.run("Explain app.js", { stream: true })) process.stdout.write(chunk);
+
+const chat = rb.chat();                                // a conversation that remembers
+await chat.send("What does app.js do?");
+console.log((await chat.send("Now write tests for it")).text);
+
+const [a, b] = await Promise.all([rb.run("Review a.js"), rb.run("Review b.js")]);  // or rb.runMany([...])
+
+const r = await rb.run("List the TODOs", { schema: { type: "object", properties: { todos: { type: "array", items: { type: "string" } } } } });
+console.log(r.data.todos);
+
+await rb.close();
+```
+
+Nothing to set up first: `new Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `maxConcurrency`, `maxCostUsd`) can be a default on the constructor and overridden on any call. `skills` takes ids or folders of skills your program ships. `approve` decides permission requests: `false` denies (the default), `true` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `sessionId`, `usage` and `raw`; `rb.usage` totals every run.
+
+## The lower-level client
+
+`await rb.client()`, or `connect()`, is what `Rbridge` is built on: sessions you drive yourself, every event, approvals with options and questions from the runtime.
+
+### Run a task
 
 ```js title="review.mjs"
 import { connect } from "@rbridge/sdk";

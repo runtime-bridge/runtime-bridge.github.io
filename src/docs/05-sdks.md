@@ -13,6 +13,8 @@ description: The same operations side by side in Go, Node.js, Python and plain H
 
 The Node.js and Python SDKs, and HTTP, talk to the daemon. The SDKs start it when it is not running (it then stops after 30 idle minutes); for HTTP, or a daemon that stays up, run `rbridge daemon start`. Go can embed rbridge with `bridge.New`, or connect to the daemon with `bridge.Connect`; both return the same `bridge.Client` interface.
 
+In Node.js and Python, start with `Rbridge`: `rb.run("...")` for an answer, `stream` for text as it arrives, `rb.chat()` for a conversation, `run_many` / `runMany` for several at once, with the runtime as an option. See the [Node.js](/docs/node/) and [Python](/docs/python/) pages. The sections below show the lower-level clients they are built on, which every SDK shares with Go and HTTP.
+
 ## Connect
 
 :::tabs
