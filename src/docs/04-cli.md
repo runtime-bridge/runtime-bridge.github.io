@@ -9,6 +9,8 @@ Every command accepts `--json`, and exit codes are stable (see [Errors and exit 
 
 ## Set up
 
+A mistyped command or provider name gets a suggestion and the list of choices, and `ls`, `rm` and `info` work wherever `list`, `remove` and `show` do.
+
 ```sh
 rbridge init                                         # folders and a commented starter configuration
 rbridge init --config ./rbridge.yaml                 # install your own file, checked first
@@ -119,5 +121,6 @@ rbridge audit --since 24h --json
 
 ```sh
 rbridge daemon start          # background; also: stop, status, run (foreground)
+rbridge daemon start --exit-when-idle 30m   # stop once nothing has used it for 30 minutes
 rbridge mcp --profile observe # MCP server on stdio for other agents
 ```

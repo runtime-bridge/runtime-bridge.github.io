@@ -25,7 +25,7 @@ with rbridge.connect(client="summary") as rb:
     print("\n---", res["provider"], res.get("usage"))
 ```
 
-`on_event` runs on a background thread for every event. `rbridge.connect(start=True)` starts the daemon first when none is running, using the rbridge that came with the package, `RBRIDGE_BIN`, or rbridge on `PATH`. `rbridge.connect_http()` uses the local HTTP API instead of the socket.
+`on_event` runs on a background thread for every event. `rbridge.connect()` starts a daemon when none is running, using the bundled rbridge (or `RBRIDGE_BIN`, or rbridge on `PATH`); a daemon started this way stops by itself after 30 idle minutes. Pass `start=False` to only connect to one already running. Tasks can be a plain prompt (`rb.run("Summarise README.md")`), and the workspace defaults to the current folder. `rbridge.connect_http()` uses the local HTTP API instead of the socket.
 
 ## Calls
 
