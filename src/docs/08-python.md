@@ -38,6 +38,52 @@ Nothing to set up first: `Rbridge()` starts the daemon if it is not running, and
 
 In async code, `AsyncRbridge` has the same calls awaited, so `asyncio.gather(rb.run("a"), rb.run("b"))` runs two at once and `await rb.run(..., stream=True)` streams.
 
+## Approvals
+
+Requests the policy profile leaves to your program are denied unless `approve` says otherwise: `True` allows them, `"read"` allows reads and searches, or a function decides each one.
+
+```py
+SAFE = {"pytest", "ruff check ."}
+
+def approve(req):
+    if req["kind"] in ("read", "search"):
+        return True
+    return req["kind"] == "execute" and req["title"].removeprefix("run ") in SAFE
+
+rb = Rbridge(runtime="claude-code", profile="controlled", approve=approve)
+rb.run("Run the tests and fix what breaks", stream=True)
+```
+
+## Structured output
+
+```py
+schema = {
+    "type": "object",
+    "required": ["findings"],
+    "properties": {"findings": {"type": "array", "items": {
+        "type": "object",
+        "required": ["severity", "file", "title"],
+        "properties": {"severity": {"enum": ["high", "medium", "low"]}, "file": {"type": "string"}, "title": {"type": "string"}},
+    }}},
+}
+res = rb.run("Review for security issues", profile="observe", schema=schema)
+for f in res.data["findings"]:
+    print(f["severity"], f["file"], f["title"])
+```
+
+## Errors
+
+```py
+import rbridge
+
+try:
+    rb.run("hi", skills=["unknown"])
+except rbridge.RbridgeError as e:
+    print(e.code)  # skill_not_found
+```
+
+The codes are listed on the [errors page](/docs/errors/).
+
 ## The lower-level client
 
 `rb.client`, or `rbridge.connect()`, is what `Rbridge` is built on: sessions you drive yourself, every event, approvals with options and questions from the runtime.
@@ -57,7 +103,7 @@ with rbridge.connect(client="summary") as rb:
 
 `on_event` runs on a background thread for every event. `rbridge.connect()` starts a daemon when none is running, using the bundled rbridge (or `RBRIDGE_BIN`, or rbridge on `PATH`); a daemon started this way stops by itself after 30 idle minutes. Pass `start=False` to only connect to one already running. Tasks can be a plain prompt (`rb.run("Summarise README.md")`), and the workspace defaults to the current folder. `rbridge.connect_http()` uses the local HTTP API instead of the socket.
 
-## Calls
+### Calls
 
 | Call | What it does |
 |---|---|
@@ -67,7 +113,9 @@ with rbridge.connect(client="summary") as rb:
 | `add_skill(path)`, `set_skill_trust(id, trust)` | Add a skill your app ships and mark it reviewed |
 | `search_skills(query)`, `add_catalog_skill(ref)` | Use configured skill catalogs |
 
-## Approvals
+### Approvals remembered for a session
+
+An approver on the lower-level client can return `{"allow": True, "remember": True}` to allow the same kind of request for the rest of the session:
 
 ```py
 SAFE = {"pytest", "ruff check ."}
@@ -79,41 +127,17 @@ def approve(req):
         return {"allow": True, "remember": True}
     return False
 
-rb.run(task, approver=approve)
+with rbridge.connect() as c:
+    c.run({"workspace": repo, "prompt": "Run the tests and fix what breaks"}, approver=approve)
 ```
 
-## Structured output
+### Modes and settings
+
+Runtimes that offer session modes and settings (ACP runtimes such as OpenCode) expose them on a session:
 
 ```py
-schema = {
-    "type": "object",
-    "required": ["findings"],
-    "properties": {"findings": {"type": "array", "items": {
-        "type": "object",
-        "required": ["severity", "file", "title"],
-        "properties": {"severity": {"enum": ["high", "medium", "low"]}, "file": {"type": "string"}, "title": {"type": "string"}},
-    }}},
-}
-res = rb.run({"workspace": repo, "prompt": "Review for security issues", "profile": "observe", "output_schema": schema})
-for f in (res.get("structured") or {}).get("findings", []):
-    print(f["severity"], f["file"], f["title"])
-```
-
-## A conversation
-
-```py
-with rb.open({"workspace": repo, "provider": "opencode"}, mode="code") as s:
+with rb.client.open({"workspace": repo, "provider": "opencode"}, mode="code") as s:
     print(s.modes())
     s.set_option("model", "large")
     s.prompt("Refactor the config loader")
-    s.prompt("Run the tests and fix what breaks")
-```
-
-## Errors
-
-```py
-try:
-    rb.run({"workspace": repo, "prompt": "hi", "skills": ["unknown"]})
-except rbridge.RbridgeError as e:
-    print(e.code)  # skill_not_found
 ```

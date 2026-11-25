@@ -37,6 +37,53 @@ await rb.close();
 
 Nothing to set up first: `new Rbridge()` starts the daemon if it is not running, and the workspace is the current folder. Every option (`runtime`, `model`, `workspace`, `skills`, `profile`, `approve`, `sandbox`, `timeout`, `maxConcurrency`, `maxCostUsd`) can be a default on the constructor and overridden on any call. `skills` takes ids or folders of skills your program ships. `stream: true` prints as the answer is written and still resolves to the whole `Response`; pass a function to receive the chunks, or use `rb.stream(...)` for an async iterator. `chat: true` makes every `run` continue one conversation (`rb.reset()` starts a new one; `rb.chat()` gives separate conversation objects). `approve` decides permission requests: `false` denies (the default), `true` allows, `"read"` allows reads, or pass a function. A `Response` has `text`, `data`, `runtime`, `sessionId`, `usage` and `raw`; `rb.usage` totals every run.
 
+## Approvals
+
+Requests the policy profile leaves to your program are denied unless `approve` says otherwise: `true` allows them, `"read"` allows reads and searches, or a function decides each one.
+
+```js
+const allowed = [/^npm test$/, /^npm run lint$/];
+
+const rb = new Rbridge({
+  runtime: "claude-code",
+  profile: "controlled",
+  approve: (req) =>
+    req.kind === "read" || req.kind === "search" ||
+    (req.kind === "execute" && allowed.some((r) => r.test(req.title.replace(/^run /, "")))),
+});
+await rb.run("Run the tests and fix what breaks", { stream: true });
+```
+
+## Structured output
+
+```js
+const res = await rb.run("Review for security issues", {
+  profile: "observe",
+  schema: {
+    type: "object",
+    required: ["findings"],
+    properties: { findings: { type: "array", items: { type: "object", required: ["severity", "file", "title"],
+      properties: { severity: { enum: ["high", "medium", "low"] }, file: { type: "string" }, title: { type: "string" } } } } },
+  },
+});
+for (const f of res.data.findings) console.log(f.severity, f.file, f.title);
+```
+
+## Errors
+
+Errors are `RbridgeError` with a stable `code` ([full list](/docs/errors/)):
+
+```js
+import { RbridgeError } from "@rbridge/sdk";
+
+try {
+  await rb.run("hi", { runtime: "codex" });
+} catch (e) {
+  if (e instanceof RbridgeError && e.code === "provider_unavailable") console.error("Codex is not installed");
+  else throw e;
+}
+```
+
 ## The lower-level client
 
 `await rb.client()`, or `connect()`, is what `Rbridge` is built on: sessions you drive yourself, every event, approvals with options and questions from the runtime.
@@ -60,7 +107,7 @@ try {
 
 `connect()` starts a daemon when none is running, using the bundled rbridge (or `RBRIDGE_BIN`, or rbridge on `PATH`); a daemon started this way stops by itself after 30 idle minutes. Pass `start: false` to only connect to one already running. Tasks can be a plain prompt (`rb.run("Summarise README.md")`), and the workspace defaults to the current folder. `connect()` finds the daemon's socket the same way rbridge does (`RBRIDGE_HOME`, XDG, OS defaults). `connectHTTP()` uses the local HTTP API and reads the URL and token from the daemon's runtime folder; turn it on with `daemon.http.enabled: true`.
 
-## Calls
+### Calls
 
 | Call | What it does |
 |---|---|
@@ -72,12 +119,15 @@ try {
 
 Options: `onEvent`, `approver`, `onInput`, `model`, `mode`.
 
-## Approvals
+### Approvals remembered for a session
+
+An approver on the lower-level client can return `{ allow: true, remember: true }` to allow the same kind of request for the rest of the session. Requests nobody answers are denied after `policy.approval_timeout`.
 
 ```js
 const allowed = [/^npm test$/, /^npm run lint$/];
+const c = await rb.client();
 
-await rb.run(task, {
+await c.run({ workspace: "/home/me/src/app", prompt: "Run the tests and fix what breaks" }, {
   approver: (req) => {
     if (req.kind === "read" || req.kind === "search") return true;
     if (req.kind === "execute" && allowed.some((r) => r.test(req.title.replace(/^run /, "")))) {
@@ -88,14 +138,12 @@ await rb.run(task, {
 });
 ```
 
-Return `true`, `false`, or `{ allow, optionId, remember }`. Requests nobody answers are denied after `policy.approval_timeout`.
-
-## Questions from the runtime
+### Questions from the runtime
 
 Some ACP agents ask the user for input, as a form or a page to open. Without `onInput` they are declined.
 
 ```js
-await rb.run(task, {
+await c.run(task, {
   onInput: async (req) => {
     if (req.mode === "url") return { action: "decline" }; // rbridge never opens URLs itself
     return { action: "accept", content: { environment: "staging" } };
@@ -103,28 +151,14 @@ await rb.run(task, {
 });
 ```
 
-## A conversation
+### Modes and settings
+
+Runtimes that offer session modes and settings (ACP runtimes such as OpenCode) expose them on a session:
 
 ```js
-const s = await rb.open({ workspace: "/home/me/src/app", provider: "opencode" }, { mode: "code" });
+const s = await c.open({ workspace: "/home/me/src/app", provider: "opencode" }, { mode: "code" });
 console.log(await s.modes());                 // { current: "code", modes: [...] }
 await s.setOption("model", "large");
 await s.prompt("Add input validation to the signup form");
-await s.prompt("Now write tests for it");
 await s.close();
-```
-
-## Errors
-
-Errors are `RbridgeError` with a stable `code`:
-
-```js
-import { RbridgeError } from "@rbridge/sdk";
-
-try {
-  await rb.run({ workspace: "/tmp/x", prompt: "hi", provider: "codex" });
-} catch (e) {
-  if (e instanceof RbridgeError && e.code === "provider_unavailable") console.error("Codex is not installed");
-  else throw e;
-}
 ```
