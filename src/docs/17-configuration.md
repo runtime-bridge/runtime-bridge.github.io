@@ -10,8 +10,9 @@ rbridge reads YAML from these layers, later ones winning; maps merge and lists a
 1. built-in defaults (`rbridge config --defaults` prints them)
 2. system: `/etc/rbridge/config.yaml`, macOS `/Library/Application Support/rbridge/config.yaml`, Windows `%ProgramData%\rbridge\config.yaml`
 3. user: `~/.config/rbridge/config.yaml`, macOS `~/Library/Application Support/rbridge/config.yaml`, Windows `%AppData%\rbridge\config.yaml`
-4. project: `.rbridge.yaml` in the workspace
-5. task: values set by the caller
+4. app: `rbridge.yaml` in the folder that holds `RBRIDGE_HOME`. With rbridge installed through an SDK into a project, the home is the project's `.rbridge`, so an application keeps its settings in `rbridge.yaml` in its own folder and rbridge reads it by itself (a running daemon picks up changes when it restarts)
+5. project: `.rbridge.yaml` in the workspace
+6. task: values set by the caller
 
 `rbridge config` prints the merged result and which files were loaded. Unknown keys are an error. The system file can list `locked` keys (dotted paths such as `policy.default_profile`) that lower layers cannot change. `RBRIDGE_HOME` puts configuration, data, cache and runtime files under one directory.
 

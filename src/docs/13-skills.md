@@ -20,6 +20,8 @@ license: Apache-2.0
 
 ## The library
 
+Every interface can name a skill by its folder: `--skill ./skills/release-notes` in the CLI, `skills=["./skills"]` in the SDKs. rbridge adds what it finds there and trusts it as reviewed, since the caller vouches for its own folder; a trust decision already made stands. To manage the library by hand:
+
 ```sh
 rbridge skills add ./skills/release-notes          # copied in, with a SHA-256 digest
 rbridge skills add ./skills/drafts --link          # used in place
