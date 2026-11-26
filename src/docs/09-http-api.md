@@ -28,7 +28,7 @@ alias rb='curl -s -H "Authorization: Bearer $TOKEN" -H "X-Rbridge-Client: my-app
 ## One-shot task
 
 ```sh
-rb http://127.0.0.1:7432/v1/run -d '{"task": {"workspace": "/home/me/src/app", "prompt": "Summarise this project"}}'
+rb http://127.0.0.1:7432/v1/run -d '{"task": {"workspace": "/home/me/src/app", "prompt": "Summarise this project"}, "model": "latest"}'
 ```
 
 ## Session with live events

@@ -66,6 +66,30 @@ curl -s http://127.0.0.1:7432/v1/run -H "Authorization: Bearer $TOKEN" -H "X-Rbr
 ```
 :::
 
+## Choose a model
+
+Every runtime keeps its own models. Give a name it accepts, or a keyword: `latest` for its newest flagship, `auto` for its own recommended choice ([details](/docs/runtimes/#choosing-a-model)). The result says which model ran.
+
+:::tabs
+```go title="Go"
+res, err := b.Run(ctx, task, bridge.WithModel("latest"))
+fmt.Println(res.Model)
+```
+```js title="Node.js"
+const rb = new Rbridge({ runtime: "claude-code", model: "latest" });
+const res = await rb.run("Summarise this project", { model: "haiku" }); // per call
+console.log(res.model); // claude-haiku-5-5
+```
+```py title="Python"
+rb = Rbridge(runtime="claude-code", model="latest")
+res = rb.run("Summarise this project", model="haiku")  # per call
+print(res.model)  # claude-haiku-5-5
+```
+```sh title="CLI"
+rbridge run --provider claude-code --model latest "Summarise this project"
+```
+:::
+
 ## Stream the answer
 
 In the SDKs, streaming is one option: the answer is printed as it is written and the call still returns all of it. Pass a function instead of `true` to receive the chunks, or use `rb.stream(...)` for an iterator.
@@ -169,7 +193,7 @@ The CLI has the same: `rbridge chat --provider claude-code`.
 
 ## Several at once
 
-The SDKs run a list of prompts side by side and return the answers in order. rbridge still applies its own limits on sessions and machine load.
+The SDKs run a list of prompts side by side and return the answers in order. rbridge still applies its own limits on sessions and machine load: runs that find no room wait their turn, first come first served, instead of failing (`queue_timeout` / `queueTimeout` limits the wait).
 
 :::tabs
 ```go title="Go"

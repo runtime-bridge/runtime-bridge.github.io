@@ -63,6 +63,27 @@ Every Claude Code account (each `CLAUDE_CONFIG_DIR`) becomes its own provider, f
 rbridge run --provider claude-code-work "Triage the open issues"
 ```
 
+## Choosing a model
+
+Every runtime keeps its own models, and a task can pick one by name or by keyword, in the CLI (`--model`), the SDKs (`model=`) and HTTP (`"model"`):
+
+| Name | Means |
+|---|---|
+| `latest` | The runtime's newest flagship. Claude Code: `opus`, its newest Opus |
+| `auto` | The runtime's own recommended choice. Claude Code: `default`, which follows the account. With `providers.<id>.model` set, that model |
+| A model name | Passed to the runtime. For ACP runtimes it is checked against the models they list; `big-pickle` finds `opencode/big-pickle`, and a typo gets the closest name |
+| Your own names | `providers.<id>.models` maps names such as `fast` to a model, and can remap `latest` and `auto` |
+
+ACP runtimes list no release dates, so `latest` keeps their default; `auto` picks a model they call auto when they have one. Model servers take their most recently pulled model for both. Every result says which model ran (`model`), and `rbridge providers show <id>` lists a runtime's names:
+
+```yaml
+providers:
+  claude-code:
+    models:
+      fast: haiku
+      latest: sonnet   # override the built-in mapping
+```
+
 ## Choosing a runtime
 
 With `--provider`, rbridge uses that runtime or fails. Without it, rbridge takes the first available provider in `providers.order` that has every required capability (`--require structured_output`).

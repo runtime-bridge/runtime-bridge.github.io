@@ -44,7 +44,7 @@ rbridge run --json "Find dead code" | jq 'select(.type=="tool.started")'
 |---|---|
 | `--workspace DIR` | Project the runtime works in (default: current directory) |
 | `--provider ID` | Runtime to use; default is the first available one that meets the requirements |
-| `--model NAME` | Model passed to the runtime |
+| `--model NAME` | `latest` (the runtime's newest flagship), `auto` (its own recommended choice), or a model name; `rbridge providers show <id>` lists the names it takes |
 | `--skill ID` | Skill to deliver; repeat for more |
 | `--require CAP` | Capability the runtime must have, such as `structured_output`; repeatable |
 | `--profile NAME` | `observe`, `standard`, `controlled` or `custom` |
