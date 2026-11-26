@@ -29,6 +29,8 @@ Every error carries a code that does not change between versions. The CLI turns 
 | `provider_protocol_error` | 60 | The runtime broke the protocol | Update the runtime; report it if it persists |
 | `internal_error` | 70 | A bug in rbridge | Please [report it](https://github.com/runtime-bridge/rbridge/issues) |
 
+Errors carry `retryable: true` when the same request may succeed later: every session slot busy, a client at its session limit, or HTTP rate limiting. The SDKs retry those when opening a session, and never retry a turn that has started.
+
 A mistyped provider id, command or subcommand gets the closest match in the message ("did you mean claude-code?") and the list of choices.
 
 ## Raised by the SDKs

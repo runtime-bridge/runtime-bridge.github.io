@@ -14,6 +14,10 @@ rbridge sessions                       # list
 rbridge sessions resume ses_1a2b3c "Continue with the tests"
 ```
 
+## When rbridge is full
+
+rbridge runs at most `execution.max_concurrent_sessions` sessions at once (fewer while the machine is busy, never zero), and in the daemon at most `daemon.max_sessions_per_client` for each client. A session that finds no room waits in a queue and starts in the order it asked. A task's `slot_wait` says how long it may wait: the SDKs' `Rbridge` waits as long as it takes (set `queue_timeout` to limit it), so `run_many` with hundreds of prompts finishes rather than failing; the CLI waits `execution.slot_wait` (30s). A wait that runs out fails with a retryable `provider_unavailable`.
+
 A conversation is a session with several turns. In the terminal that is `rbridge chat --provider claude-code`; in the SDKs, `chat=True` (`chat: true`) on `Rbridge` makes every run continue the same session, or `rb.chat()` gives a separate one; in Go, `b.Open` returns a session to `Prompt` again and again.
 
 Sessions whose process ended unexpectedly show as `interrupted`. Old ones are pruned with `rbridge sessions prune` and, in the daemon, daily.

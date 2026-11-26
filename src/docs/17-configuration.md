@@ -24,7 +24,8 @@ rbridge reads YAML from these layers, later ones winning; maps merge and lists a
 | `order` | `[claude-code, opencode]` | Preference when a task names no provider; others follow alphabetically |
 | `<id>.enabled` | `true` | Turn a provider off |
 | `<id>.executable` | detected | Absolute path to pin one installation |
-| `<id>.model` | runtime default | Model used when a task does not choose one |
+| `<id>.model` | runtime default | Model used when a task does not choose one, and what `auto` means when set |
+| `<id>.models` | `{}` | Short model names a task may use, mapped to the runtime's own, such as `{fast: haiku, latest: sonnet}`. They extend and override the runtime's built-in names (Claude Code: `latest` is `opus`, `auto` is `default`). `rbridge providers show <id>` lists them |
 | `<id>.url` | `OLLAMA_HOST`, then `http://127.0.0.1:11434` | Address of a model server such as `ollama`; must be on this machine |
 | `<id>.args` | manifest | Replace the launch arguments (for example `--experimental-acp` for older Gemini CLI) |
 | `<id>.allow_account_login` | `false` | Use an account login for providers that need an API key by default (Gemini CLI). Ignored for `claude-acp` |
@@ -78,7 +79,7 @@ Claude Code keeps each account in its own directory, chosen with `CLAUDE_CONFIG_
 | `max_concurrent_sessions` | `2` | Per process (CLI, library or daemon) |
 | `task_timeout` | `30m` | Per turn unless the task sets its own |
 | `idle_timeout` | `5m` | End a turn that produces no event for this long |
-| `slot_wait` | `30s` | How long a new session waits for a free slot before failing with `provider_unavailable` |
+| `slot_wait` | `30s` | How long a new session waits for a free slot before failing with a retryable `provider_unavailable`. Waiting sessions start in the order they asked. A task can set its own `slot_wait`; a negative one waits until a slot frees, which is what the Node.js and Python `Rbridge` do, so their runs queue instead of failing |
 | `resource_ceiling_percent` | `0` (off) | How busy sessions may make the machine. Below 75% of it every slot is available; from there concurrency ramps down to one session at the ceiling. A lone session always starts. Linux only; elsewhere nothing is throttled |
 | `memory_headroom_mb` | `2048` | Free memory below which memory use counts towards the ceiling |
 | `command_timeout` | `10m` | Reserved for commands rbridge runs itself |
@@ -105,7 +106,8 @@ Claude Code keeps each account in its own directory, chosen with `CLAUDE_CONFIG_
 | `http.allowed_origins` | `[]` | Browser origins allowed to call the API |
 | `http.allow_non_loopback` | `false` | Required to listen on a non-loopback address |
 | `event_buffer` | `2000` | Events kept per session for replay |
-| `requests_per_second` | `20` | Per client, bursts of twice that |
+| `max_sessions_per_client` | `8` | Open sessions per client name; `0` is no limit. A client at its limit waits for one of its sessions to close, as long as `slot_wait` allows |
+| `requests_per_second` | `20` | Per client, bursts of twice that (HTTP); a refused request is retryable |
 | `session_idle_timeout` | `30m` | Close daemon sessions nobody uses |
 
 ## sandbox
