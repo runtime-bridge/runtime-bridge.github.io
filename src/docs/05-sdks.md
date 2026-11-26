@@ -66,6 +66,27 @@ curl -s http://127.0.0.1:7432/v1/run -H "Authorization: Bearer $TOKEN" -H "X-Rbr
 ```
 :::
 
+## Send documents
+
+A task can bring files: paths, or uploads straight from a web framework. rbridge copies them into a working folder of their own for the run (removed afterwards), writes a text copy of each Word file with page markers, and tells the runtime what it has. The runtime reads PDF and text files itself.
+
+:::tabs
+```go title="Go"
+res, err := b.Run(ctx, bridge.Task{Prompt: bridge.Text("Summarise these"), Files: []string{"/data/report.pdf", "/data/bill.docx"}})
+```
+```js title="Node.js"
+await rb.run("Summarise these", { files: ["report.pdf", "bill.docx"] });
+await rb.run("Summarise this", { files: [formData.get("file")] }); // a File from a form
+```
+```py title="Python"
+rb.run("Summarise these", files=["report.pdf", "bill.docx"])
+await arb.run("Summarise this", files=[upload])  # FastAPI's UploadFile
+```
+```sh title="CLI"
+rbridge run --file report.pdf --file bill.docx "Summarise these"
+```
+:::
+
 ## Choose a model
 
 Every runtime keeps its own models. Give a name it accepts, or a keyword: `latest` for its newest flagship, `auto` for its own recommended choice ([details](/docs/runtimes/#choosing-a-model)). The result says which model ran.
@@ -226,7 +247,7 @@ for f in a.py b.py c.py; do rbridge run --quiet "Review $f" & done; wait
 
 ## Ship your own skill
 
-In the SDKs a skill folder your program ships can be named by its path: it is added and trusted on first use.
+A skill folder your program ships can be named by its path, in every interface: rbridge adds it and trusts it as reviewed on first use (a trust decision made already stands). `rb.skills()` lists the library, to show people what they can choose.
 
 :::tabs
 ```go title="Go"

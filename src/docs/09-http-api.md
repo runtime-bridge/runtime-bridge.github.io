@@ -35,6 +35,8 @@ rb http://127.0.0.1:7432/v1/run -d '{"task": {"workspace": "/home/me/src/app", "
 
 ```sh
 SESSION=$(rb http://127.0.0.1:7432/v1/sessions -d '{"task": {"workspace": "/home/me/src/app", "profile": "controlled"}}' | jq -r .id)
+# A task can bring files instead of a workspace; rbridge makes a folder for them:
+#   {"task": {"files": ["/data/report.pdf"], "prompt": "Summarise it"}}
 
 # In another terminal: follow events (reconnect with Last-Event-ID or ?after=<seq>)
 rb -N http://127.0.0.1:7432/v1/sessions/$SESSION/events
